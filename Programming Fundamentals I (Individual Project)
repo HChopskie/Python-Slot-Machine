@@ -1,0 +1,263 @@
+import random
+import sys
+reel_1 = ['!!!!!!!', '@@@@@@@', '@@@@@@@', '#######', '#######', '#######', '&&&&&&&', '&&&&&&&', '&&&&&&&', '&&&&&&&', '%%%%%%%', '%%%%%%%', '%%%%%%%', '%%%%%%%', '%%%%%%%']
+reel_2 = ['!!!!!!!', '@@@@@@@', '@@@@@@@', '#######', '#######', '#######', '&&&&&&&', '&&&&&&&', '&&&&&&&', '&&&&&&&', '%%%%%%%', '%%%%%%%', '%%%%%%%', '%%%%%%%', '%%%%%%%']
+reel_3 = ['!!!!!!!', '@@@@@@@', '@@@@@@@', '#######', '#######', '#######', '&&&&&&&', '&&&&&&&', '&&&&&&&', '&&&&&&&', '%%%%%%%', '%%%%%%%', '%%%%%%%', '%%%%%%%', '%%%%%%%']
+jackpots = 0
+mega_wins = 0
+wins = 0
+losses = 0
+bank = 500
+play = True
+bet = 0
+
+
+def begin():
+    global bank, bet, play
+    play = True
+    print("Welcome to the slot machine!")
+    print()
+    print("Rules:")
+    print("Match 2 matching symbols in a row to win, or match 3 in a row to get a mega win")
+    print("Match 3 '!!!!!!!' to get the jackpot")
+    print("Betting will multiply normal winnings by how much you bet")
+    print("You are starting with a balance of $500")
+    print()
+    while play == True:
+        try:
+            bet = int(input("To place a starting bet, enter a positive integer: "))
+        except ValueError:
+            print("Not an integer!")
+            continue
+        else:
+            if (bet > bank):
+                print("Can't bet higher than what you have!")
+            elif (bet > 0):
+                bank -= bet
+                print("You are starting with a bet of ${}".format(bet))
+                first_spin = input("To begin, press 'y': ")
+                if first_spin == 'y':
+                    spin()
+                else:
+                    while first_spin != 'y':
+                        first_spin = input("To begin, press 'y': ")
+                        if first_spin == 'y':
+                            spin()
+                
+            else:
+                 while bet <= 0:
+                     print("Not a positive number!")  
+                     try:
+                         bet = int(input("To place a starting bet, enter a positive integer: "))
+                     except ValueError:
+                        print("Not an integer!")
+                        continue
+                     else:
+                        if bet > 0:
+                            bank -= bet
+                            print("You are starting with a bet of ${}".format(bet))
+                            first_spin = input("To begin, press 'y': ")
+                            if first_spin == 'y':
+                                spin()
+                            else:
+                                while (first_spin != 'y'):
+                                    first_spin = input("To begin, press 'y': ")
+                                    if first_spin == 'y':
+                                        spin()
+
+                                        
+def spin():
+    global jackpots, mega_wins, wins, losses, bank, play, bet
+    win = 0
+    win_bonus = 0
+    pick_1 = random.choice(reel_1)
+    pick_2 = random.choice(reel_2)
+    pick_3 = random.choice(reel_3)
+    print("|----------------------SPINNING FOR ${}----------------------|".format(bet))
+    print("|-----------------------------------------------------------|")
+    print("| [ | ", pick_1," | ] "," [ | ", pick_2," | ] "," [ | ", pick_3, " | ] |")
+    print("|-----------------------------------------------------------|")
+    if (pick_1 == '!!!!!!!') and (pick_2 == '!!!!!!!') and (pick_3 == '!!!!!!!'):
+        print("YOU GOT THE JACKPOT!!!!!!!!!!")
+        win = 250
+        jackpots += 1
+    elif (pick_1 == pick_2) and (pick_2 == pick_3):
+        print("MEGA WINNER!!!!!")
+        mega_wins += 1
+        win_bonus = 2
+        if ((pick_1 == '%%%%%%%') and (pick_2 == '%%%%%%%') and (pick_3 == '%%%%%%%')):
+            win = 2
+        elif ((pick_1 == '&&&&&&&') and (pick_2 == '&&&&&&&') and (pick_3 == '&&&&&&&')):
+            win = 5
+        elif ((pick_1 == '#######') and (pick_2 == '#######') and (pick_3 == '#######')):
+            win = 10
+        elif ((pick_1 == '@@@@@@@') and (pick_2 == '@@@@@@@') and (pick_3 == '@@@@@@@')):
+            win = 20
+        elif ((pick_1 == '!!!!!!!') and (pick_2 == '!!!!!!!') and (pick_3 == '!!!!!!!')):
+            win = 50
+    elif (pick_1 == pick_2) or (pick_2 == pick_3):
+        print("WINNER!")
+        wins += 1
+        win_bonus = 1
+        if ((pick_1 == '%%%%%%%') and (pick_2 == '%%%%%%%')) or ((pick_2 == '%%%%%%%') and (pick_3 == '%%%%%%%')):
+            win = 2
+        elif ((pick_1 == '&&&&&&&') and (pick_2 == '&&&&&&&')) or ((pick_2 == '&&&&&&&') and (pick_3 == '&&&&&&&')):
+            win = 5
+        elif ((pick_1 == '#######') and (pick_2 == '#######')) or ((pick_2 == '#######') and (pick_3 == '#######')):
+            win = 10
+        elif ((pick_1 == '@@@@@@@') and (pick_2 == '@@@@@@@')) or ((pick_2 == '@@@@@@@') and (pick_3 == '@@@@@@@')):
+            win = 20
+        elif ((pick_1 == '!!!!!!!') and (pick_2 == '!!!!!!!')) or ((pick_2 == '!!!!!!!') and (pick_3 == '!!!!!!!')):
+            win = 50
+    else:
+        print("LOSER!")
+        losses += 1
+    total = (bet * win) * win_bonus
+    bank = bank + total
+    if bank <= 0:
+        print()
+        print("GAME OVER! You lost everything!")
+        leave()
+        sys.exit()
+    else:
+        if total > 0:
+            print("You won ${}".format(total))
+        else:
+            print("You lost ${}".format(bet))
+        print("You have a balance of ${}".format(bank))
+        
+        spin_again = input("To spin again, press 'y'. To leave the slot machine, press 'n'. To change your bet, press 'b': ")
+        if spin_again == 'y':
+            if bet > bank:
+                print("You can't bet higher than what you have! You must lower your bet to continue playing.")
+                change_bet()
+            else:
+                bank -= bet
+                print()
+                spin()
+        if spin_again == 'n':
+            bet = 0
+            play = False
+            leave()
+        if spin_again == 'b':
+            change_bet()
+        
+            
+        else:
+            while (spin_again != 'y') and (spin_again != 'n') and (spin_again != 'b'):
+                spin_again = input("Please enter a valid answer: ")
+                if spin_again == 'y':
+                    bank -= bet
+                    print("You have a bank of ${}".format(bank))
+                    spin()
+                if spin_again == 'n':
+                    bet = 0
+                    play = False
+                    leave()
+                if spin_again == 'b':
+                    change_bet()
+
+                    
+def change_bet():
+    global play, bet, bank
+    while play == True:
+            try:
+                bet = int(input("Enter a positive integer to change your bet: "))
+            except ValueError:
+                print("Not an integer!")
+                continue
+            else:
+                if (bet > bank):
+                    print("Can't bet higher than what you have!")
+                elif (bet > 0):
+                    print("You have changed your bet to ${}".format(bet))
+                    spin_again = input("To spin again, press 'y'. To leave the slot machine, press 'n'. To change your bet, press 'b': ")
+                    if spin_again == 'y':
+                        bank -= bet
+                        print("You have a balance of ${}".format(bank))
+                        spin()
+                    elif spin_again == 'b':
+                        change_bet()
+                    elif spin_again == 'n':
+                        play = False
+                        leave()
+        
+                    else:
+                        while (spin_again != 'y') and (spin_again != 'n') and (spin_again != 'b'):
+                            spin_again = input("Please enter a valid answer: ")
+                            if spin_again == 'y':
+                                spin()
+                            elif spin_again == 'n':
+                                play = False
+                                leave()
+                            elif spin_again == 'b':
+                                change_bet()
+
+                
+                else:
+                     while bet <= 0:
+                         print("Not a positive number!")
+                     
+                         try:
+                             bet = int(input("To change your bet, enter a positive integer: "))
+                         
+                    
+                         except ValueError:
+                             print("Not an integer!")
+                             continue
+                         else:
+                             if bet > 0:
+                                    print("You have changed your bet to ${}".format(bet))
+                                    spin_again = input("To spin again, press 'y'. To leave the slot machine, press 'n'. To change your bet, press 'b': ")
+                                    if spin_again == 'y':
+                                        bank -= bet
+                                        print("You have a balance of ${}".format(bank))
+                                        spin()
+                                    elif spin_again == 'b':
+                                        change_bet()
+                                    elif spin_again == 'n':
+                                        play = False
+                                        leave()
+                        
+                                    else:
+                                        while (spin_again != 'y') and (spin_again != 'n') and (spin_again != 'b'):
+                                            spin_again = input("Please enter a valid answer: ")
+                                            if spin_again == 'y':
+                                                spin()
+                                            elif spin_again == 'n':
+                                                play = False
+                                                leave()
+                                            elif spin_again == 'b':
+                                                change_bet()
+
+    
+def leave():
+    print()
+    if (wins == 0) or (wins > 1):
+        rounds_won = "rounds, "
+    else:
+        rounds_won = "round, "
+    if (losses == 0) or (losses > 1):
+        rounds_lost = "rounds, "
+    else:
+        rounds_lost = "round, "
+    if (mega_wins == 0) or (mega_wins > 1):
+        rounds_mega_wins = "mega wins, "
+    else:
+        rounds_mega_wins = "mega win, "
+    if (jackpots == 0) or (jackpots > 1):
+        rounds_jackpots = "jackpots. "
+    else:
+        rounds_jackpots = "jackpot. "
+    print("You have left the slot machine")
+    print("You won", wins, rounds_won, "you lost", losses, rounds_lost, "you had", mega_wins, rounds_mega_wins, "and", jackpots, rounds_jackpots)
+    print()
+    if bank >= 0:
+        print("You finished with a total of ${}".format(bank))
+
+begin()
+
+
+    
+    
+
